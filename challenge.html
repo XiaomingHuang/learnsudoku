@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数独挑战 - 小朋友的数独乐园</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            background-color: #f0f9ff;
+            background-image: linear-gradient(120deg, #e0f7fa 0%, #fff8e1 100%);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 8px solid #ffcc80;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffcc80' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        
+        h1 {
+            color: #8a2be2;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px rgba(138, 43, 226, 0.2);
+            animation: bounce 2s infinite, colorChange 8s infinite;
+            position: relative;
+        }
+        
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b88, #8a2be2);
+            border-radius: 10px;
+        }
+        
+        h2 {
+            color: #ff6b88;
+            font-size: 1.8em;
+            margin-top: 30px;
+            text-shadow: 2px 2px 0px rgba(255, 107, 136, 0.2);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::before, h2::after {
+            content: "★";
+            color: #ffcc80;
+            position: absolute;
+            top: 0;
+            font-size: 0.8em;
+        }
+        
+        h2::before {
+            left: -20px;
+        }
+        
+        h2::after {
+            right: -20px;
+        }
+        
+        p {
+            font-size: 1.2em;
+            line-height: 1.5;
+            color: #555;
+        }
+        
+        .grid-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 45px);
+            grid-template-rows: repeat(9, 45px);
+            gap: 1px;
+            background-color: #8a2be2;
+            padding: 5px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.3);
+            transform: perspective(800px) rotateX(5deg);
+            transition: transform 0.3s ease;
+        }
+        
+        .sudoku-grid:hover {
+            transform: perspective(800px) rotateX(0);
+        }
+        
+        .sudoku-cell {
+            background-color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 3px rgba(0,0,0,0.05);
+        }
+        
+        .sudoku-cell:hover {
+            background-color: #f0e6ff;
+            transform: scale(1.05);
+            box-shadow: inset 0 0 5px rgba(138, 43, 226, 0.2);
+        }
+        
+        .sudoku-cell.highlight {
+            background-color: #ffff99;
+            box-shadow: 0 0 10px #ffff00;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .sudoku-cell.fixed {
+            color: #8a2be2;
+            font-weight: bold;
+            background-color: #f9f5ff;
+        }
+        
+        .sudoku-cell.correct {
+            color: #2ecc71;
+            animation: celebrate 1s;
+            background-color: #f0fff0;
+        }
+        
+        .sudoku-cell.incorrect {
+            color: #e74c3c;
+            animation: shake 0.5s;
+            background-color: #fff0f0;
+        }
+        
+        .box-border-top {
+            border-top: 2px solid #8a2be2;
+        }
+        
+        .box-border-left {
+            border-left: 2px solid #8a2be2;
+        }
+        
+        .number-pad {
+            display: grid;
+            grid-template-columns: repeat(9, 40px);
+            gap: 5px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .number-btn {
+            background: linear-gradient(145deg, #9a3af2, #7126a8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(138, 43, 226, 0.3);
+        }
+        
+        .number-btn:hover {
+            background: linear-gradient(145deg, #7126a8, #9a3af2);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 6px 12px rgba(138, 43, 226, 0.4);
+        }
+        
+        .number-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(138, 43, 226, 0.3);
+        }
+        
+        .button {
+            background: linear-gradient(145deg, #ff6b88, #e74c3c);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            padding: 12px 25px;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 136, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .button::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            z-index: 1;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        
+        .button:hover {
+            background: linear-gradient(145deg, #e74c3c, #ff6b88);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 107, 136, 0.4);
+        }
+        
+        .button:hover::before {
+            opacity: 1;
+            animation: shine 1.5s infinite;
+        }
+        
+        .button:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 10px rgba(255, 107, 136, 0.3);
+        }
+        
+        .difficulty-selector {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .difficulty-btn {
+            background: linear-gradient(145deg, #9a3af2, #7126a8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(138, 43, 226, 0.3);
+        }
+        
+        .difficulty-btn.active {
+            background: linear-gradient(145deg, #ff6b88, #e74c3c);
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(255, 107, 136, 0.4);
+        }
+        
+        .difficulty-btn:hover:not(.active) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(138, 43, 226, 0.4);
+        }
+        
+        .timer {
+            font-size: 1.8em;
+            margin: 15px 0;
+            color: #8a2be2;
+            font-weight: bold;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .timer::before, .timer::after {
+            content: "⏱️";
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .timer::before {
+            left: -30px;
+        }
+        
+        .timer::after {
+            right: -30px;
+        }
+        
+        .toggle-rules {
+            background: linear-gradient(145deg, #9a3af2, #7126a8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(138, 43, 226, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toggle-rules::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            z-index: 1;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        
+        .toggle-rules:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(138, 43, 226, 0.4);
+        }
+        
+        .toggle-rules:hover::before {
+            opacity: 1;
+            animation: shine 1.5s infinite;
+        }
+        
+        .toggle-rules:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(138, 43, 226, 0.3);
+        }
+        
+        .rules-section {
+            text-align: left;
+            background-color: #fffadd;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(255, 204, 128, 0.3);
+            border: 2px dashed #ffcc80;
+            transition: all 0.5s ease;
+        }
+        
+        .rule-item {
+            margin-bottom: 25px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .rule-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .rule-text p {
+            position: relative;
+            padding-left: 30px;
+            font-weight: bold;
+            color: #8a2be2;
+        }
+        
+        .rule-text p::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238a2be2'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        
+        .demo-caption {
+            font-size: 0.9em;
+            margin: 5px 0 15px 0;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .demo-caption::before {
+            content: "👉 ";
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            background-color: transparent;
+            background-image: radial-gradient(circle, transparent 40%, currentColor 40%);
+            animation: fall 5s linear;
+            z-index: 1000;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
+        }
+        
+        @keyframes fall {
+            0% { top: -10px; transform: translateX(0) rotate(0deg); }
+            100% { top: 100vh; transform: translateX(100px) rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 255, 0, 0.8); }
+        }
+        
+        @keyframes shine {
+            0% { left: -50%; }
+            100% { left: 150%; }
+        }
+        
+        @keyframes colorChange {
+            0% { color: #8a2be2; }
+            25% { color: #ff6b88; }
+            50% { color: #ffcc80; }
+            75% { color: #2ecc71; }
+            100% { color: #8a2be2; }
+        }
+        
+        .author {
+            font-style: italic;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 3px dashed #8a2be2;
+            color: #666;
+            position: relative;
+        }
+        
+        .author::before, .author::after {
+            content: "♥";
+            color: #ff6b88;
+            position: absolute;
+            top: -15px;
+            font-size: 1.5em;
+        }
+        
+        .author::before {
+            left: 30%;
+        }
+        
+        .author::after {
+            right: 30%;
+        }
+        
+        /* 添加响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+            }
+            
+            .sudoku-grid {
+                grid-template-columns: repeat(9, 35px);
+                grid-template-rows: repeat(9, 35px);
+            }
+            
+            .sudoku-cell {
+                font-size: 18px;
+            }
+            
+            .number-pad {
+                grid-template-columns: repeat(9, 30px);
+                gap: 3px;
+            }
+            
+            .number-btn {
+                font-size: 16px;
+                height: 30px;
+            }
+            
+            .button {
+                font-size: 1em;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>数独挑战</h1>
+        <p>欢迎来到数独挑战！这里有更大的9×9数独游戏，让我们一起来挑战吧！</p>
+        
+        <button class="toggle-rules" id="toggle-rules-btn">查看游戏规则</button>
+        
+        <div class="rules-section" id="rules-section" style="display: none;">
+            <h3>9×9数独游戏规则：</h3>
+            
+            <div class="rule-item">
+                <div class="rule-text">
+                    <p>1. 每一行必须有1到9的数字，每个数字只能出现一次。</p>
+                </div>
+                <div class="rule-demo">
+                    <div class="demo-grid demo-grid-row">
+                        <div class="demo-cell">1</div>
+                        <div class="demo-cell">2</div>
+                        <div class="demo-cell">3</div>
+                        <div class="demo-cell">4</div>
+                        <div class="demo-cell">5</div>
+                        <div class="demo-cell">6</div>
+                        <div class="demo-cell">7</div>
+                        <div class="demo-cell">8</div>
+                        <div class="demo-cell">9</div>
+                    </div>
+                    <p class="demo-caption">✓ 正确：每行中1-9的数字各出现一次</p>
+                    
+                    <div class="demo-grid demo-grid-row">
+                        <div class="demo-cell">1</div>
+                        <div class="demo-cell">2</div>
+                        <div class="demo-cell">3</div>
+                        <div class="demo-cell">4</div>
+                        <div class="demo-cell">5</div>
+                        <div class="demo-cell error">5</div>
+                        <div class="demo-cell">7</div>
+                        <div class="demo-cell">8</div>
+                        <div class="demo-cell">9</div>
+                    </div>
+                    <p class="demo-caption">✗ 错误：数字5在同一行出现两次</p>
+                </div>
+            </div>
+            
+            <div class="rule-item">
+                <div class="rule-text">
+                    <p>2. 每一列必须有1到9的数字，每个数字只能出现一次。</p>
+                </div>
+                <div class="rule-demo">
+                    <div style="display: flex; justify-content: center;">
+                        <div class="demo-grid demo-grid-col">
+                            <div class="demo-cell">1</div>
+                            <div class="demo-cell">2</div>
+                            <div class="demo-cell">3</div>
+                            <div class="demo-cell">4</div>
+                            <div class="demo-cell">5</div>
+                            <div class="demo-cell">6</div>
+                            <div class="demo-cell">7</div>
+                            <div class="demo-cell">8</div>
+                            <div class="demo-cell">9</div>
+                        </div>
+                    </div>
+                    <p class="demo-caption">✓ 正确：每列中1-9的数字各出现一次</p>
+                    
+                    <div style="display: flex; justify-content: center;">
+                        <div class="demo-grid demo-grid-col">
+                            <div class="demo-cell">1</div>
+                            <div class="demo-cell">2</div>
+                            <div class="demo-cell">3</div>
+                            <div class="demo-cell error">3</div>
+                            <div class="demo-cell">5</div>
+                            <div class="demo-cell">6</div>
+                            <div class="demo-cell">7</div>
+                            <div class="demo-cell">8</div>
+                            <div class="demo-cell">9</div>
+                        </div>
+                    </div>
+                    <p class="demo-caption">✗ 错误：数字3在同一列出现两次</p>
+                </div>
+            </div>
+            
+            <div class="rule-item">
+                <div class="rule-text">
+                    <p>3. 每个3×3宫格必须有1到9的数字，每个数字只能出现一次。</p>
+                </div>
+                <div class="rule-demo">
+                    <div class="demo-grid demo-grid-box">
+                        <div class="demo-cell">1</div>
+                        <div class="demo-cell">2</div>
+                        <div class="demo-cell">3</div>
+                        <div class="demo-cell">4</div>
+                        <div class="demo-cell">5</div>
+                        <div class="demo-cell">6</div>
+                        <div class="demo-cell">7</div>
+                        <div class="demo-cell">8</div>
+                        <div class="demo-cell">9</div>
+                    </div>
+                    <p class="demo-caption">✓ 正确：每个3×3宫格中1-9的数字各出现一次</p>
+                    
+                    <div class="demo-grid demo-grid-box">
+                        <div class="demo-cell">1</div>
+                        <div class="demo-cell">2</div>
+                        <div class="demo-cell">3</div>
+                        <div class="demo-cell">4</div>
+                        <div class="demo-cell error">4</div>
+                        <div class="demo-cell">6</div>
+                        <div class="demo-cell">7</div>
+                        <div class="demo-cell">8</div>
+                        <div class="demo-cell">9</div>
+                    </div>
+                    <p class="demo-caption">✗ 错误：数字4在同一个3×3宫格中出现两次</p>
+                </div>
+            </div>
+            
+            <div class="rule-item">
+                <div class="rule-text">
+                    <p>4. 点击空白格子，然后选择一个数字填进去。</p>
+                </div>
+                <div class="rule-demo">
+                    <div class="demo-animation">
+                        <div class="demo-grid demo-grid-small">
+                            <div class="demo-cell">1</div>
+                            <div class="demo-cell highlight">?</div>
+                            <div class="demo-cell">3</div>
+                            <div class="demo-cell">4</div>
+                            <div class="demo-cell">5</div>
+                            <div class="demo-cell">6</div>
+                            <div class="demo-cell">7</div>
+                            <div class="demo-cell">8</div>
+                            <div class="demo-cell">9</div>
+                        </div>
+                        <div class="demo-arrow">↓</div>
+                        <div class="demo-numbers">
+                            <div class="demo-number-btn">1</div>
+                            <div class="demo-number-btn selected">2</div>
+                            <div class="demo-number-btn">3</div>
+                        </div>
+                        <div class="demo-arrow">↓</div>
+                        <div class="demo-grid demo-grid-small">
+                            <div class="demo-cell">1</div>
+                            <div class="demo-cell correct">2</div>
+                            <div class="demo-cell">3</div>
+                            <div class="demo-cell">4</div>
+                            <div class="demo-cell">5</div>
+                            <div class="demo-cell">6</div>
+                            <div class="demo-cell">7</div>
+                            <div class="demo-cell">8</div>
+                            <div class="demo-cell">9</div>
+                        </div>
+                    </div>
+                    <p class="demo-caption">点击空格，然后选择数字2填入</p>
+                </div>
+            </div>
+            
+            <div class="rule-item">
+                <div class="rule-text">
+                    <p>5. 如果你选对了，数字会变绿色；如果选错了，数字会变红色。</p>
+                </div>
+                <div class="rule-demo">
+                    <div style="display: flex; justify-content: space-around; width: 100%;">
+                        <div>
+                            <div class="demo-grid demo-grid-small">
+                                <div class="demo-cell">1</div>
+                                <div class="demo-cell correct animate-celebrate">2</div>
+                                <div class="demo-cell">3</div>
+                                <div class="demo-cell">4</div>
+                                <div class="demo-cell">5</div>
+                                <div class="demo-cell">6</div>
+                                <div class="demo-cell">7</div>
+                                <div class="demo-cell">8</div>
+                                <div class="demo-cell">9</div>
+                            </div>
+                            <p class="demo-caption">✓ 正确答案：变绿色</p>
+                        </div>
+                        <div>
+                            <div class="demo-grid demo-grid-small">
+                                <div class="demo-cell">1</div>
+                                <div class="demo-cell incorrect animate-shake">7</div>
+                                <div class="demo-cell">3</div>
+                                <div class="demo-cell">4</div>
+                                <div class="demo-cell">5</div>
+                                <div class="demo-cell">6</div>
+                                <div class="demo-cell">2</div>
+                                <div class="demo-cell">8</div>
+                                <div class="demo-cell">9</div>
+                            </div>
+                            <p class="demo-caption">✗ 错误答案：变红色</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-item">
+                <div class="rule-text">
+                    <p>6. 你可以选择不同的难度级别来挑战自己。</p>
+                </div>
+                <div class="rule-demo">
+                    <div style="display: flex; justify-content: center; gap: 10px;">
+                        <button class="difficulty-btn active">简单</button>
+                        <button class="difficulty-btn">中等</button>
+                        <button class="difficulty-btn">困难</button>
+                    </div>
+                    <p class="demo-caption">难度越高，初始数字越少，挑战越大！</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-difficulty="easy">简单</button>
+            <button class="difficulty-btn" data-difficulty="medium">中等</button>
+            <button class="difficulty-btn" data-difficulty="hard">困难</button>
+        </div>
+        
+        <div class="timer" id="timer">00:00</div>
+        
+        <div class="grid-container">
+            <div>
+                <div class="sudoku-grid" id="sudoku-grid">
+                    <!-- 格子会通过脚本填充 -->
+                </div>
+                
+                <div class="number-pad" id="number-pad">
+                    <button class="number-btn" data-number="1">1</button>
+                    <button class="number-btn" data-number="2">2</button>
+                    <button class="number-btn" data-number="3">3</button>
+                    <button class="number-btn" data-number="4">4</button>
+                    <button class="number-btn" data-number="5">5</button>
+                    <button class="number-btn" data-number="6">6</button>
+                    <button class="number-btn" data-number="7">7</button>
+                    <button class="number-btn" data-number="8">8</button>
+                    <button class="number-btn" data-number="9">9</button>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="button" id="hint-btn">提示</button>
+                    <button class="button" id="new-game-btn">新游戏</button>
+                    <button class="button" id="back-btn">返回主页</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="author">
+            <p>星星爸爸：送给星星和他的朋友们</p>
+        </div>
+    </div>
+
+    <script>
+        // 数独生成和求解算法
+        class SudokuGenerator {
+            constructor() {
+                this.grid = Array(9).fill().map(() => Array(9).fill(0));
+                this.solution = Array(9).fill().map(() => Array(9).fill(0));
+            }
+            
+            // 检查数字在特定位置是否有效
+            isValid(row, col, num) {
+                // 检查行
+                for (let x = 0; x < 9; x++) {
+                    if (this.grid[row][x] === num) {
+                        return false;
+                    }
+                }
+                
+                // 检查列
+                for (let x = 0; x < 9; x++) {
+                    if (this.grid[x][col] === num) {
+                        return false;
+                    }
+                }
+                
+                // 检查3x3方格
+                let startRow = Math.floor(row / 3) * 3;
+                let startCol = Math.floor(col / 3) * 3;
+                
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        if (this.grid[i + startRow][j + startCol] === num) {
+                            return false;
+                        }
+                    }
+                }
+                
+                return true;
+            }
+            
+            // 使用回溯法填充数独
+            fillGrid() {
+                for (let row = 0; row < 9; row++) {
+                    for (let col = 0; col < 9; col++) {
+                        if (this.grid[row][col] === 0) {
+                            // 随机尝试1-9
+                            let nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                            nums = this.shuffleArray(nums);
+                            
+                            for (let num of nums) {
+                                if (this.isValid(row, col, num)) {
+                                    this.grid[row][col] = num;
+                                    
+                                    if (this.fillGrid()) {
+                                        return true;
+                                    }
+                                    
+                                    this.grid[row][col] = 0;
+                                }
+                            }
+                            
+                            return false;
+                        }
+                    }
+                }
+                
+                return true;
+            }
+            
+            // 随机打乱数组
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            
+            // 生成谜题
+            generatePuzzle(difficulty) {
+                // 重置网格
+                this.grid = Array(9).fill().map(() => Array(9).fill(0));
+                
+                // 填充完整的数独
+                this.fillGrid();
+                
+                // 保存解答
+                this.solution = JSON.parse(JSON.stringify(this.grid));
+                
+                // 根据难度移除单元格
+                let cellsToRemove;
+                
+                switch(difficulty) {
+                    case 'easy':
+                        cellsToRemove = 40; // 保留41个数字
+                        break;
+                    case 'medium':
+                        cellsToRemove = 50; // 保留31个数字
+                        break;
+                    case 'hard':
+                        cellsToRemove = 60; // 保留21个数字
+                        break;
+                    default:
+                        cellsToRemove = 40;
+                }
+                
+                // 随机移除单元格
+                let positions = [];
+                for (let i = 0; i < 81; i++) {
+                    positions.push(i);
+                }
+                positions = this.shuffleArray(positions);
+                
+                for (let i = 0; i < cellsToRemove; i++) {
+                    const pos = positions[i];
+                    const row = Math.floor(pos / 9);
+                    const col = pos % 9;
+                    this.grid[row][col] = 0;
+                }
+                
+                return {
+                    puzzle: this.grid,
+                    solution: this.solution
+                };
+            }
+        }
+        
+        // 游戏状态
+        let selectedCell = null;
+        let gameBoard = [];
+        let solution = [];
+        let difficulty = 'easy';
+        let timerInterval = null;
+        let startTime = null;
+        
+        // 初始化游戏
+        function initGame() {
+            const grid = document.getElementById('sudoku-grid');
+            grid.innerHTML = '';
+            
+            // 生成新的数独谜题
+            const generator = new SudokuGenerator();
+            const sudoku = generator.generatePuzzle(difficulty);
+            
+            // 将二维数组转换为一维数组以便处理
+            gameBoard = [];
+            solution = [];
+            
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    gameBoard.push(sudoku.puzzle[i][j]);
+                    solution.push(sudoku.solution[i][j]);
+                }
+            }
+            
+            // 创建9x9网格
+            for (let i = 0; i < 81; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'sudoku-cell';
+                
+                // 添加3x3方格的边框
+                const row = Math.floor(i / 9);
+                const col = i % 9;
+                
+                if (row % 3 === 0 && row !== 0) {
+                    cell.classList.add('box-border-top');
+                }
+                
+                if (col % 3 === 0 && col !== 0) {
+                    cell.classList.add('box-border-left');
+                }
+                
+                cell.dataset.index = i;
+                
+                if (gameBoard[i] !== 0) {
+                    cell.textContent = gameBoard[i];
+                    cell.classList.add('fixed');
+                } else {
+                    cell.addEventListener('click', selectCell);
+                }
+                
+                grid.appendChild(cell);
+            }
+            
+            // 添加数字按钮事件
+            document.querySelectorAll('.number-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (selectedCell !== null) {
+                        const num = parseInt(btn.dataset.number);
+                        placeNumber(num);
+                    }
+                });
+            });
+            
+            // 重置选中状态
+            selectedCell = null;
+            
+            // 重置并启动计时器
+            resetTimer();
+            startTimer();
+        }
+        
+        // 选中单元格
+        function selectCell() {
+            // 先清除之前的高亮
+            if (selectedCell !== null) {
+                document.querySelectorAll('.sudoku-cell').forEach(cell => {
+                    cell.classList.remove('highlight');
+                });
+            }
+            
+            selectedCell = parseInt(this.dataset.index);
+            this.classList.add('highlight');
+        }
+        
+        // 放置数字
+        function placeNumber(number) {
+            if (selectedCell === null) return;
+            
+            const cells = document.querySelectorAll('.sudoku-cell');
+            const cell = cells[selectedCell];
+            
+            if (!cell) return;
+            
+            // 检查答案是否正确
+            if (solution[selectedCell] === number) {
+                cell.textContent = number;
+                cell.classList.add('correct');
+                gameBoard[selectedCell] = number;
+                
+                // 移除事件监听器，因为这个单元格已经填好了
+                cell.removeEventListener('click', selectCell);
+                
+                // 检查是否完成了游戏
+                if (!gameBoard.includes(0)) {
+                    stopTimer();
+                    setTimeout(createConfetti, 500);
+                }
+            } else {
+                cell.textContent = number;
+                cell.classList.add('incorrect');
+                
+                // 一段时间后移除错误标记
+                setTimeout(() => {
+                    cell.textContent = '';
+                    cell.classList.remove('incorrect');
+                }, 1000);
+            }
+            
+            // 重置选中状态
+            selectedCell = null;
+            document.querySelectorAll('.sudoku-cell').forEach(cell => {
+                cell.classList.remove('highlight');
+            });
+        }
+        
+        // 提示功能
+        function giveHint() {
+            if (gameBoard.includes(0)) {
+                // 找到一个空白单元格
+                const emptyIndex = gameBoard.findIndex(cell => cell === 0);
+                
+                // 给出提示
+                const cells = document.querySelectorAll('.sudoku-cell');
+                const cell = cells[emptyIndex];
+                
+                if (cell) {
+                    cell.textContent = solution[emptyIndex];
+                    cell.classList.add('correct');
+                    gameBoard[emptyIndex] = solution[emptyIndex];
+                    
+                    // 移除事件监听器
+                    cell.removeEventListener('click', selectCell);
+                    
+                    // 检查是否完成了游戏
+                    if (!gameBoard.includes(0)) {
+                        stopTimer();
+                        setTimeout(createConfetti, 500);
+                    }
+                }
+            }
+        }
+        
+        // 计时器功能
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+        
+        function resetTimer() {
+            stopTimer();
+            document.getElementById('timer').textContent = '00:00';
+        }
+        
+        function updateTimer() {
+            const now = new Date();
+            const diff = Math.floor((now - startTime) / 1000);
+            const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+            const seconds = (diff % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+        }
+        
+        // 创建庆祝效果
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                document.body.appendChild(confetti);
+                
+                // 移除动画完成后的五彩纸屑
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // 确保DOM加载完成后再初始化游戏
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化按钮
+            const hintBtn = document.getElementById('hint-btn');
+            const newGameBtn = document.getElementById('new-game-btn');
+            const backBtn = document.getElementById('back-btn');
+            const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+            const toggleRulesBtn = document.getElementById('toggle-rules-btn');
+            const rulesSection = document.getElementById('rules-section');
+            
+            // 难度选择
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    difficulty = this.dataset.difficulty;
+                    initGame();
+                });
+            });
+            
+            // 提示按钮
+            if (hintBtn) {
+                hintBtn.addEventListener('click', giveHint);
+            }
+            
+            // 新游戏按钮
+            if (newGameBtn) {
+                newGameBtn.addEventListener('click', initGame);
+            }
+            
+            // 返回主页按钮
+            if (backBtn) {
+                backBtn.addEventListener('click', function() {
+                    window.location.href = 'shudu.html';
+                });
+            }
+            
+            // 规则按钮
+            if (toggleRulesBtn) {
+                toggleRulesBtn.addEventListener('click', function() {
+                    if (rulesSection.style.display === 'none') {
+                        rulesSection.style.display = 'block';
+                    } else {
+                        rulesSection.style.display = 'none';
+                    }
+                });
+            }
+            
+            // 初始化游戏
+            initGame();
+        });
+    </script>
+</body>
+</html>

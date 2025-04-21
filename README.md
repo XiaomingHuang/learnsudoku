@@ -31,15 +31,15 @@
 
 1. 克隆仓库到本地：
    ```bash
-   git clone https://github.com/yourusername/shudu.git
+   git clone https://github.com/yourusername/learnsudoku.git
    ```
 
 2. 打开项目文件夹：
    ```bash
-   cd shudu
+   cd learnsudoku
    ```
 
-3. 在浏览器中打开 `shudu.html` 文件开始游戏：
+3. 在浏览器中打开 `index.html` 文件开始游戏：
    - 可以直接双击文件
    - 或使用本地服务器（如 Live Server）运行
 

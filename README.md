@@ -68,9 +68,9 @@
 ## 📝 项目结构
 
 ```
-shudu/
+learnsudoku/
 │
-├── shudu.html          # 主页面，包含4×4数独游戏
+├── index.html          # 主页面，包含4×4数独游戏
 ├── challenge.html      # 挑战页面，包含9×9数独游戏
 └── README.md           # 项目说明文档
 ```

@@ -97,6 +97,23 @@
             transition: transform 0.3s ease;
         }
         
+        /* 6x6数独网格样式 */
+        .sudoku-grid.grid-6x6 {
+            grid-template-columns: repeat(6, 50px);
+            grid-template-rows: repeat(6, 50px);
+            width: 310px; /* 6个格子 * 50px + 5个间隙 * 1px + 边框padding 5px*2 */
+            margin: 0 auto; /* 居中显示 */
+        }
+        
+        /* 6x6数独的边框样式 */
+        .sudoku-grid.grid-6x6 .box-border-top {
+            border-top: 2px solid #8a2be2;
+        }
+        
+        .sudoku-grid.grid-6x6 .box-border-left {
+            border-left: 2px solid #8a2be2;
+        }
+        
         .sudoku-grid:hover {
             transform: perspective(800px) rotateX(0);
         }
@@ -182,6 +199,10 @@
             box-shadow: 0 2px 4px rgba(138, 43, 226, 0.3);
         }
         
+        .number-btn-9x9 {
+            display: block;
+        }
+        
         .button {
             background: linear-gradient(145deg, #ff6b88, #e74c3c);
             color: white;
@@ -232,6 +253,37 @@
             display: flex;
             justify-content: center;
             gap: 10px;
+        }
+        
+        /* 游戏大小选择器样式 */
+        .size-selector {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .size-btn {
+            background: linear-gradient(145deg, #9a3af2, #7126a8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(138, 43, 226, 0.3);
+        }
+        
+        .size-btn.active {
+            background: linear-gradient(145deg, #ff6b88, #e74c3c);
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(255, 107, 136, 0.4);
+        }
+        
+        .size-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(138, 43, 226, 0.4);
         }
         
         .difficulty-btn {
@@ -509,7 +561,7 @@
         <button class="toggle-rules" id="toggle-rules-btn">查看游戏规则</button>
         
         <div class="rules-section" id="rules-section" style="display: none;">
-            <h3>9×9数独游戏规则：</h3>
+            <h3>数独游戏规则：</h3>
             
             <div class="rule-item">
                 <div class="rule-text">
@@ -713,6 +765,11 @@
             <button class="difficulty-btn" data-difficulty="hard">困难</button>
         </div>
         
+        <div class="size-selector">
+            <button class="size-btn active" data-size="9x9">9x9</button>
+            <button class="size-btn" data-size="6x6">6x6</button>
+        </div>
+        
         <div class="timer" id="timer">00:00</div>
         
         <div class="grid-container">
@@ -728,9 +785,9 @@
                     <button class="number-btn" data-number="4">4</button>
                     <button class="number-btn" data-number="5">5</button>
                     <button class="number-btn" data-number="6">6</button>
-                    <button class="number-btn" data-number="7">7</button>
-                    <button class="number-btn" data-number="8">8</button>
-                    <button class="number-btn" data-number="9">9</button>
+                    <button class="number-btn number-btn-9x9" data-number="7">7</button>
+                    <button class="number-btn number-btn-9x9" data-number="8">8</button>
+                    <button class="number-btn number-btn-9x9" data-number="9">9</button>
                 </div>
                 
                 <div style="margin-top: 20px;">
@@ -749,33 +806,38 @@
     <script>
         // 数独生成和求解算法
         class SudokuGenerator {
-            constructor() {
-                this.grid = Array(9).fill().map(() => Array(9).fill(0));
-                this.solution = Array(9).fill().map(() => Array(9).fill(0));
+            constructor(size = 9) {
+                this.size = size;
+                this.boxSize = size === 9 ? 3 : 2; // 9x9用3x3宫格，6x6用2x3宫格
+                this.grid = Array(size).fill().map(() => Array(size).fill(0));
+                this.solution = Array(size).fill().map(() => Array(size).fill(0));
             }
             
             // 检查数字在特定位置是否有效
             isValid(row, col, num) {
                 // 检查行
-                for (let x = 0; x < 9; x++) {
+                for (let x = 0; x < this.size; x++) {
                     if (this.grid[row][x] === num) {
                         return false;
                     }
                 }
                 
                 // 检查列
-                for (let x = 0; x < 9; x++) {
+                for (let x = 0; x < this.size; x++) {
                     if (this.grid[x][col] === num) {
                         return false;
                     }
                 }
                 
-                // 检查3x3方格
-                let startRow = Math.floor(row / 3) * 3;
-                let startCol = Math.floor(col / 3) * 3;
+                // 检查方格
+                let boxRowSize = this.size === 9 ? 3 : 2; // 9x9用3x3宫格，6x6用2x3宫格
+                let boxColSize = this.size === 9 ? 3 : 3; // 9x9用3x3宫格，6x6用2x3宫格
                 
-                for (let i = 0; i < 3; i++) {
-                    for (let j = 0; j < 3; j++) {
+                let startRow = Math.floor(row / boxRowSize) * boxRowSize;
+                let startCol = Math.floor(col / boxColSize) * boxColSize;
+                
+                for (let i = 0; i < boxRowSize; i++) {
+                    for (let j = 0; j < boxColSize; j++) {
                         if (this.grid[i + startRow][j + startCol] === num) {
                             return false;
                         }
@@ -787,11 +849,11 @@
             
             // 使用回溯法填充数独
             fillGrid() {
-                for (let row = 0; row < 9; row++) {
-                    for (let col = 0; col < 9; col++) {
+                for (let row = 0; row < this.size; row++) {
+                    for (let col = 0; col < this.size; col++) {
                         if (this.grid[row][col] === 0) {
-                            // 随机尝试1-9
-                            let nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                            // 随机尝试1-9或1-6
+                            let nums = Array.from({length: this.size}, (_, i) => i + 1);
                             nums = this.shuffleArray(nums);
                             
                             for (let num of nums) {
@@ -826,7 +888,7 @@
             // 生成谜题
             generatePuzzle(difficulty) {
                 // 重置网格
-                this.grid = Array(9).fill().map(() => Array(9).fill(0));
+                this.grid = Array(this.size).fill().map(() => Array(this.size).fill(0));
                 
                 // 填充完整的数独
                 this.fillGrid();
@@ -836,32 +898,33 @@
                 
                 // 根据难度移除单元格
                 let cellsToRemove;
+                const totalCells = this.size * this.size;
                 
                 switch(difficulty) {
                     case 'easy':
-                        cellsToRemove = 40; // 保留41个数字
+                        cellsToRemove = this.size === 9 ? 40 : 20; // 9x9保留41个，6x6保留16个
                         break;
                     case 'medium':
-                        cellsToRemove = 50; // 保留31个数字
+                        cellsToRemove = this.size === 9 ? 50 : 25; // 9x9保留31个，6x6保留11个
                         break;
                     case 'hard':
-                        cellsToRemove = 60; // 保留21个数字
+                        cellsToRemove = this.size === 9 ? 60 : 30; // 9x9保留21个，6x6保留6个
                         break;
                     default:
-                        cellsToRemove = 40;
+                        cellsToRemove = this.size === 9 ? 40 : 20;
                 }
                 
                 // 随机移除单元格
                 let positions = [];
-                for (let i = 0; i < 81; i++) {
+                for (let i = 0; i < totalCells; i++) {
                     positions.push(i);
                 }
                 positions = this.shuffleArray(positions);
                 
                 for (let i = 0; i < cellsToRemove; i++) {
                     const pos = positions[i];
-                    const row = Math.floor(pos / 9);
-                    const col = pos % 9;
+                    const row = Math.floor(pos / this.size);
+                    const col = pos % this.size;
                     this.grid[row][col] = 0;
                 }
                 
@@ -877,6 +940,7 @@
         let gameBoard = [];
         let solution = [];
         let difficulty = 'easy';
+        let gridSize = '9x9';
         let timerInterval = null;
         let startTime = null;
         
@@ -885,36 +949,63 @@
             const grid = document.getElementById('sudoku-grid');
             grid.innerHTML = '';
             
+            // 设置网格大小样式
+            if (gridSize === '6x6') {
+                grid.classList.add('grid-6x6');
+                // 隐藏7-9数字按钮
+                document.querySelectorAll('.number-btn-9x9').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            } else {
+                grid.classList.remove('grid-6x6');
+                // 显示7-9数字按钮
+                document.querySelectorAll('.number-btn-9x9').forEach(btn => {
+                    btn.style.display = 'block';
+                });
+            }
+            
             // 生成新的数独谜题
-            const generator = new SudokuGenerator();
+            const generator = new SudokuGenerator(gridSize === '9x9' ? 9 : 6);
             const sudoku = generator.generatePuzzle(difficulty);
             
             // 将二维数组转换为一维数组以便处理
             gameBoard = [];
             solution = [];
             
-            for (let i = 0; i < 9; i++) {
-                for (let j = 0; j < 9; j++) {
+            for (let i = 0; i < (gridSize === '9x9' ? 9 : 6); i++) {
+                for (let j = 0; j < (gridSize === '9x9' ? 9 : 6); j++) {
                     gameBoard.push(sudoku.puzzle[i][j]);
                     solution.push(sudoku.solution[i][j]);
                 }
             }
             
             // 创建9x9网格
-            for (let i = 0; i < 81; i++) {
+            for (let i = 0; i < (gridSize === '9x9' ? 81 : 36); i++) {
                 const cell = document.createElement('div');
                 cell.className = 'sudoku-cell';
                 
                 // 添加3x3方格的边框
-                const row = Math.floor(i / 9);
-                const col = i % 9;
+                const row = Math.floor(i / (gridSize === '9x9' ? 9 : 6));
+                const col = i % (gridSize === '9x9' ? 9 : 6);
                 
-                if (row % 3 === 0 && row !== 0) {
-                    cell.classList.add('box-border-top');
-                }
-                
-                if (col % 3 === 0 && col !== 0) {
-                    cell.classList.add('box-border-left');
+                if (gridSize === '9x9') {
+                    // 9x9数独的边框
+                    if (row % 3 === 0 && row !== 0) {
+                        cell.classList.add('box-border-top');
+                    }
+                    
+                    if (col % 3 === 0 && col !== 0) {
+                        cell.classList.add('box-border-left');
+                    }
+                } else {
+                    // 6x6数独的边框 (2x3宫格)
+                    if (row % 2 === 0 && row !== 0) {
+                        cell.classList.add('box-border-top');
+                    }
+                    
+                    if (col % 3 === 0 && col !== 0) {
+                        cell.classList.add('box-border-left');
+                    }
                 }
                 
                 cell.dataset.index = i;
@@ -1074,6 +1165,7 @@
             const newGameBtn = document.getElementById('new-game-btn');
             const backBtn = document.getElementById('back-btn');
             const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+            const sizeBtns = document.querySelectorAll('.size-btn');
             const toggleRulesBtn = document.getElementById('toggle-rules-btn');
             const rulesSection = document.getElementById('rules-section');
             
@@ -1083,6 +1175,16 @@
                     difficultyBtns.forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     difficulty = this.dataset.difficulty;
+                    initGame();
+                });
+            });
+            
+            // 大小选择
+            sizeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    sizeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    gridSize = this.dataset.size;
                     initGame();
                 });
             });
@@ -1109,6 +1211,8 @@
                 toggleRulesBtn.addEventListener('click', function() {
                     if (rulesSection.style.display === 'none') {
                         rulesSection.style.display = 'block';
+                        // 更新规则文本以匹配当前游戏大小
+                        updateRulesText();
                     } else {
                         rulesSection.style.display = 'none';
                     }
@@ -1118,6 +1222,21 @@
             // 初始化游戏
             initGame();
         });
+        
+        // 更新规则文本以匹配当前游戏大小
+        function updateRulesText() {
+            const maxNum = gridSize === '9x9' ? '9' : '6';
+            const boxSize = gridSize === '9x9' ? '3×3' : '2×3';
+            
+            document.querySelector('.rules-section h3').textContent = `${gridSize}数独游戏规则：`;
+            
+            const ruleParagraphs = document.querySelectorAll('.rule-text p');
+            if (ruleParagraphs.length >= 3) {
+                ruleParagraphs[0].textContent = `1. 每一行必须有1到${maxNum}的数字，每个数字只能出现一次。`;
+                ruleParagraphs[1].textContent = `2. 每一列必须有1到${maxNum}的数字，每个数字只能出现一次。`;
+                ruleParagraphs[2].textContent = `3. 每个${boxSize}宫格必须有1到${maxNum}的数字，每个数字只能出现一次。`;
+            }
+        }
     </script>
 </body>
 </html>
